@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "181435458777",
+    "project_id": "sse3401-project",
+    "storage_bucket": "sse3401-project.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:181435458777:android:e892faf4c40a1a921a8ac8",
+        "android_client_info": {
+          "package_name": "com.example.recipe_rover"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgVX6Xwa_g641_GJMVhSEtI3UaO5AROLA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:181435458777:android:1f229aa05a7dfb441a8ac8",
+        "android_client_info": {
+          "package_name": "com.example.whats_cooking"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgVX6Xwa_g641_GJMVhSEtI3UaO5AROLA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

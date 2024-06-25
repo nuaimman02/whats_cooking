@@ -1,9 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class RecipeScreen extends StatelessWidget {
+class RecipeScreen extends StatefulWidget {
   const RecipeScreen({Key? key}) : super(key: key);
-  // rest of the class
+
+  @override
+  _RecipeScreenState createState() => _RecipeScreenState();
+}
+
+class _RecipeScreenState extends State<RecipeScreen> {
+  String searchValue = "";
 
   @override
   Widget build(BuildContext context) {
@@ -21,32 +27,62 @@ class RecipeScreen extends StatelessWidget {
           ],
         ),
       ),
-      body: RecipeGrid(),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              onChanged: (value) {
+                setState(() {
+                  searchValue = value;
+                });
+              },
+              decoration: InputDecoration(
+                labelText: 'Search Recipe',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ),
+          Expanded(
+            child: RecipeGrid(searchValue: searchValue),
+          ),
+        ],
+      ),
     );
   }
 }
 
 class RecipeGrid extends StatelessWidget {
+  final String searchValue;
+
+  RecipeGrid({required this.searchValue});
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection("recipes").snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
+          return Center(child: CircularProgressIndicator());
         }
 
         if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
+          return Center(child: Text('Error: ${snapshot.error}'));
         }
 
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(
-            child: Text('No recipes found.'),
-          );
+          return Center(child: Text('No recipes found.'));
         }
 
         List<QueryDocumentSnapshot> recipeList = snapshot.data!.docs;
+
+        // Filter the recipes based on the search value
+        if (searchValue.isNotEmpty) {
+          recipeList = recipeList.where((doc) {
+            String name = doc['name'].toString().toLowerCase();
+            return name.contains(searchValue.toLowerCase());
+          }).toList();
+        }
 
         return GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -71,13 +107,10 @@ class RecipeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    0.0; // Assuming rating is a double field in your Firestore document
-
     return Card(
       margin: EdgeInsets.all(8.0),
       child: InkWell(
         onTap: () {
-          // Navigate to a new screen to display the detailed recipe
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -88,17 +121,8 @@ class RecipeCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /*
-            // Display the image using the Image.asset widget
-            Image.asset(
-              'recipe.png', // Adjust the image path as needed
-              height: 150, // Adjust the height as needed
-              width: double.infinity, // Make the image take the full width
-              fit: BoxFit.cover, // Adjust the BoxFit property as needed
-            ),
-            SizedBox(height: 8.0), // Add some spacing below the image
-            */
-            recipe['imageUrl'] != null ? Image.network(
+            recipe['imageUrl'] != null
+                ? Image.network(
               recipe['imageUrl'],
               height: 150,
               width: double.infinity,
@@ -111,7 +135,6 @@ class RecipeCard extends StatelessWidget {
               fit: BoxFit.cover,
             ),
             SizedBox(height: 8.0),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Column(
@@ -120,43 +143,26 @@ class RecipeCard extends StatelessWidget {
                   Text(
                     recipe["name"],
                     style: TextStyle(
-                      fontSize: 20.0, // Increase the font size
+                      fontSize: 20.0,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black, // Change the font color
+                      color: Colors.black,
                     ),
                   ),
-                  SizedBox(
-                      height: 4.0), // Add some spacing below the recipe name
-
+                  SizedBox(height: 4.0),
                   Row(
                     children: [
-                      Icon(
-                        Icons.star,
-                        color: Colors.yellow,
-                      ),
-                      Icon(
-                        Icons.star,
-                        color: Colors.yellow,
-                      ),
-                      Icon(
-                        Icons.star,
-                        color: Colors.yellow,
-                      ),
-                      Icon(
-                        Icons.star_half,
-                        color: Colors.yellow,
-                      ),
-                      Icon(
-                        Icons.star_border,
-                        color: Colors.yellow,
-                      ),
+                      Icon(Icons.star, color: Colors.yellow),
+                      Icon(Icons.star, color: Colors.yellow),
+                      Icon(Icons.star, color: Colors.yellow),
+                      Icon(Icons.star_half, color: Colors.yellow),
+                      Icon(Icons.star_border, color: Colors.yellow),
                       SizedBox(width: 4.0),
                     ],
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 8.0), // Add some spacing below the recipe details
+            SizedBox(height: 8.0),
           ],
         ),
       ),
@@ -200,18 +206,9 @@ class RecipeDetails extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Add an image above the recipe name
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(
-                        12.0), // Adjust the radius as needed
-                    child: /* Image.asset(
-                      'recipe2.jpg', // Adjust the image path as needed
-                      height: 250,
-                      width: 300,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  */ recipe['imageUrl'] != null
+                    borderRadius: BorderRadius.circular(12.0),
+                    child: recipe['imageUrl'] != null
                         ? Image.network(
                       recipe['imageUrl'],
                       height: 250,
@@ -232,19 +229,11 @@ class RecipeDetails extends StatelessWidget {
                       fontSize: 28.0,
                       fontWeight: FontWeight.bold,
                       color: Colors.orange,
-                      // You can change the font family
                     ),
                     textAlign: TextAlign.center,
                   ),
-
                   SizedBox(height: 16.0),
-
-                  // ...
-
-                  // ...
-
                   Divider(),
-
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
@@ -256,9 +245,7 @@ class RecipeDetails extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   SizedBox(height: 8.0),
-
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
@@ -272,11 +259,8 @@ class RecipeDetails extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   Divider(),
-
                   SizedBox(height: 16.0),
-
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
@@ -288,9 +272,7 @@ class RecipeDetails extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   SizedBox(height: 8.0),
-
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
@@ -304,10 +286,6 @@ class RecipeDetails extends StatelessWidget {
                       ),
                     ),
                   ),
-
-// ...
-
-// ...
                 ],
               ),
             ),

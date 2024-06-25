@@ -82,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 width: 400,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage("assets/logo.png"),
+                    image: AssetImage("assets/whatscooking_logo.png"),
                   ),
                 ),
               ),

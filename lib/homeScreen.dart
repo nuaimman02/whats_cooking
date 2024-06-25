@@ -1,3 +1,4 @@
+// this is add recipe page
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,7 +17,7 @@ class HomeScreen extends StatelessWidget {
         title: Row(
           children: <Widget>[
             Image.asset(
-              'assets/logo.png',
+              'assets/whatscooking_logo.png',
               height: 80,
               width: 100,
             ),

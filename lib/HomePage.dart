@@ -10,7 +10,7 @@ class HomePage extends StatelessWidget {
         title: Row(
           children: <Widget>[
             Image.asset(
-              'assets/logo.png',
+              'assets/whatscooking_logo.png',
               height: 80,
               width: 100,
             ),

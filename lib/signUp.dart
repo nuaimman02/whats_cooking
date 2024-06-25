@@ -3,14 +3,21 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:whats_cooking/authService.dart';
 import 'package:whats_cooking/signIn.dart';
+import 'package:whats_cooking/SuccessSign.dart'; // Import SuccessSign widget
 
-class RegistrationForm extends StatelessWidget {
+class RegistrationForm extends StatefulWidget {
+  @override
+  _RegistrationFormState createState() => _RegistrationFormState();
+}
+
+class _RegistrationFormState extends State<RegistrationForm> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController nameController = TextEditingController();
   TextEditingController ageController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   final AuthService authService = AuthService();
+  bool _showSuccess = false;
 
   bool isValidEmail(String email) {
     return RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
@@ -19,73 +26,88 @@ class RegistrationForm extends StatelessWidget {
 
   Future<bool> isEmailAlreadyRegistered(String email) async {
     final CollectionReference usersCollection =
-        FirebaseFirestore.instance.collection('users');
+    FirebaseFirestore.instance.collection('users');
 
     QuerySnapshot snapshot =
-        await usersCollection.where('email', isEqualTo: email).get();
+    await usersCollection.where('email', isEqualTo: email).get();
 
     return snapshot.docs.isNotEmpty;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    signUp() async {
-      try {
-        if (_formKey.currentState?.validate() ?? false) {
-          final UserCredential userCredential =
-              await FirebaseAuth.instance.createUserWithEmailAndPassword(
-            email: emailController.text,
-            password: passwordController.text,
-          );
+  void signUp() async {
+    try {
+      if (_formKey.currentState?.validate() ?? false) {
+        final UserCredential userCredential =
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: emailController.text,
+          password: passwordController.text,
+        );
 
-          if (userCredential.user != null) {
-            // Registration successful, proceed with saving data to Firestore
-            await FirebaseFirestore.instance.collection('users').add({
-              "name": nameController.text,
-              "email": emailController.text,
-              "password": passwordController.text,
-            });
+        if (userCredential.user != null) {
+          // Registration successful, proceed with saving data to Firestore
+          await FirebaseFirestore.instance.collection('users').add({
+            "name": nameController.text,
+            "email": emailController.text,
+            "password": passwordController.text,
+          });
 
-            final userDetails = {
-              "name": nameController.text,
-              "email": emailController.text,
-              "password": passwordController.text,
-            };
+          // Show success message
+          _showSuccessMessage('Successfully signed up!');
 
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SignInForm(),
-              ),
-            );
-          }
-        }
-      } catch (e) {
-        if (e is FirebaseAuthException) {
-          if (e.code == 'email-already-in-use') {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                    "Email is already in use. Please use a different email."),
-                backgroundColor: Colors.red,
-              ),
-            );
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text("Registration failed. Please try again."),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        } else {
-          print(e);
+          // Clear form fields after successful registration
+          nameController.clear();
+          ageController.clear();
+          emailController.clear();
+          passwordController.clear();
         }
       }
+    } catch (e) {
+      if (e is FirebaseAuthException) {
+        if (e.code == 'email-already-in-use') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  "Email is already in use. Please use a different email."),
+              backgroundColor: Colors.red,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Registration failed. Please try again."),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } else {
+        print(e);
+      }
     }
+  }
 
-// Example isEmailAlreadyRegistered function (replace it with your actual implementation)
+  void _showSuccessMessage(String message) {
+    setState(() {
+      _showSuccess = true;
+    });
 
+    // Hide the success message after 5 seconds
+    Future.delayed(Duration(seconds: 5), () {
+      if (mounted) {
+        setState(() {
+          _showSuccess = false;
+        });
+      }
+    });
+  }
+
+  void _dismissSuccessSign() {
+    setState(() {
+      _showSuccess = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -294,6 +316,11 @@ class RegistrationForm extends StatelessWidget {
                               style: TextStyle(color: Colors.blueGrey),
                             ),
                           ),
+                          if (_showSuccess)
+                            SuccessSign(
+                              message: 'Successfully signed up!',
+                              onDismiss: _dismissSuccessSign,
+                            ),
                         ],
                       ),
                     ),

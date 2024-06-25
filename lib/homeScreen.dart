@@ -1,42 +1,19 @@
-// this is add recipe page
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:whats_cooking/RecipeCard.dart';
+import 'package:whats_cooking/SuccessSign.dart'; // Import SuccessSign widget
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: <Widget>[
-            Image.asset(
-              'assets/whatscooking_logo.png',
-              height: 80,
-              width: 100,
-            ),
-            const SizedBox(width: 10),
-            const Text("What's Cooking"),
-          ],
-        ),
-      ),
-      body: RecipeCard(),
-    );
-  }
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
-class RecipeCard extends StatefulWidget {
-  @override
-  _RecipeCardState createState() => _RecipeCardState();
-}
-
-class _RecipeCardState extends State<RecipeCard> {
+class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   TextEditingController recipeNameController = TextEditingController();
@@ -44,6 +21,7 @@ class _RecipeCardState extends State<RecipeCard> {
   TextEditingController stepsController = TextEditingController();
   File? _image;
   final ImagePicker _picker = ImagePicker();
+  bool _showSuccess = false;
 
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -56,19 +34,19 @@ class _RecipeCardState extends State<RecipeCard> {
 
   Future<String> _uploadImage(File image) async {
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    Reference storageReference = FirebaseStorage.instance.ref().child('recipes/$fileName');
+    Reference storageReference =
+    FirebaseStorage.instance.ref().child('recipes/$fileName');
     UploadTask uploadTask = storageReference.putFile(image);
     TaskSnapshot snapshot = await uploadTask;
     return await snapshot.ref.getDownloadURL();
   }
-
 
   Future<void> addRecipe(String name, String ingredients, String steps) async {
     // Check if the form is valid
     if (_formKey.currentState?.validate() ?? false) {
       // If the form is valid, proceed to add the recipe
       final CollectionReference recipes =
-          FirebaseFirestore.instance.collection('recipes');
+      FirebaseFirestore.instance.collection('recipes');
 
       // Generate a unique ID for the recipe
       String recipeId = DateTime.now().millisecondsSinceEpoch.toString();
@@ -87,14 +65,10 @@ class _RecipeCardState extends State<RecipeCard> {
         'steps': steps,
         'imageUrl': imageUrl,
       }).then((_) {
-        // Navigate to RecipeScreen after adding the recipe
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                RecipeScreen(), // Pass the recipeId to RecipeScreen
-          ),
-        );
+        // Show success sign
+        setState(() {
+          _showSuccess = true;
+        });
 
         // Clear the text fields and image path after adding the recipe
         setState(() {
@@ -104,17 +78,84 @@ class _RecipeCardState extends State<RecipeCard> {
           _image = null;
         });
       });
-
-      // Continue with the rest of your code
     }
   }
+
+  void _dismissSuccessSign() {
+    setState(() {
+      _showSuccess = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: <Widget>[
+            Image.asset(
+              'assets/whatscooking_logo.png',
+              height: 80,
+              width: 100,
+            ),
+            const SizedBox(width: 10),
+            const Text("What's Cooking"),
+          ],
+        ),
+      ),
+      body: Stack(
+        children: [
+          RecipeCard(
+            formKey: _formKey,
+            recipeNameController: recipeNameController,
+            ingredientsController: ingredientsController,
+            stepsController: stepsController,
+            image: _image,
+            pickImage: _pickImage,
+            addRecipe: addRecipe,
+          ),
+          if (_showSuccess)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.7),
+                alignment: Alignment.center,
+                child: SuccessSign(
+                  message: 'Recipe added successfully!',
+                  onDismiss: _dismissSuccessSign,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class RecipeCard extends StatelessWidget {
+  final GlobalKey<FormState> formKey;
+  final TextEditingController recipeNameController;
+  final TextEditingController ingredientsController;
+  final TextEditingController stepsController;
+  final File? image;
+  final VoidCallback pickImage;
+  final Function(String, String, String) addRecipe;
+
+  RecipeCard({
+    required this.formKey,
+    required this.recipeNameController,
+    required this.ingredientsController,
+    required this.stepsController,
+    required this.image,
+    required this.pickImage,
+    required this.addRecipe,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: SingleChildScrollView(
         child: Form(
-          key: _formKey,
+          key: formKey,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -162,13 +203,11 @@ class _RecipeCardState extends State<RecipeCard> {
                 ),
                 SizedBox(height: 16.0),
                 ElevatedButton(
-                  onPressed: _pickImage,
+                  onPressed: pickImage,
                   child: Text("Pick Image"),
                 ),
                 SizedBox(height: 16.0),
-                _image != null
-                    ? Image.file(_image!)
-                    : Text('No image selected'),
+                image != null ? Image.file(image!) : Text('No image selected'),
                 SizedBox(height: 16.0),
                 ElevatedButton(
                   onPressed: () {

@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:whats_cooking/RecipeCard.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -17,7 +21,7 @@ class HomeScreen extends StatelessWidget {
               width: 100,
             ),
             const SizedBox(width: 10),
-            const Text("Recipe Rover"),
+            const Text("What's Cooking"),
           ],
         ),
       ),
@@ -37,6 +41,26 @@ class _RecipeCardState extends State<RecipeCard> {
   TextEditingController recipeNameController = TextEditingController();
   TextEditingController ingredientsController = TextEditingController();
   TextEditingController stepsController = TextEditingController();
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      }
+    });
+  }
+
+  Future<String> _uploadImage(File image) async {
+    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    Reference storageReference = FirebaseStorage.instance.ref().child('recipes/$fileName');
+    UploadTask uploadTask = storageReference.putFile(image);
+    TaskSnapshot snapshot = await uploadTask;
+    return await snapshot.ref.getDownloadURL();
+  }
+
 
   Future<void> addRecipe(String name, String ingredients, String steps) async {
     // Check if the form is valid
@@ -48,12 +72,19 @@ class _RecipeCardState extends State<RecipeCard> {
       // Generate a unique ID for the recipe
       String recipeId = DateTime.now().millisecondsSinceEpoch.toString();
 
+      String? imageUrl;
+
+      if (_image != null) {
+        imageUrl = await _uploadImage(_image!);
+      }
+
       // Add the recipe details to Firestore
       await recipes.add({
         'id': recipeId, // Include a unique ID for the recipe
         'name': name,
         'ingredients': ingredients,
         'steps': steps,
+        'imageUrl': imageUrl,
       }).then((_) {
         // Navigate to RecipeScreen after adding the recipe
         Navigator.push(
@@ -69,6 +100,7 @@ class _RecipeCardState extends State<RecipeCard> {
           recipeNameController.clear();
           ingredientsController.clear();
           stepsController.clear();
+          _image = null;
         });
       });
 
@@ -127,6 +159,15 @@ class _RecipeCardState extends State<RecipeCard> {
                   },
                   maxLines: 5,
                 ),
+                SizedBox(height: 16.0),
+                ElevatedButton(
+                  onPressed: _pickImage,
+                  child: Text("Pick Image"),
+                ),
+                SizedBox(height: 16.0),
+                _image != null
+                    ? Image.file(_image!)
+                    : Text('No image selected'),
                 SizedBox(height: 16.0),
                 ElevatedButton(
                   onPressed: () {

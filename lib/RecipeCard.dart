@@ -17,7 +17,7 @@ class RecipeScreen extends StatelessWidget {
               width: 100,
             ),
             const SizedBox(width: 10),
-            const Text("Recipe Rover"),
+            const Text("What's Cooking"),
           ],
         ),
       ),
@@ -88,6 +88,7 @@ class RecipeCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /*
             // Display the image using the Image.asset widget
             Image.asset(
               'recipe.png', // Adjust the image path as needed
@@ -96,6 +97,20 @@ class RecipeCard extends StatelessWidget {
               fit: BoxFit.cover, // Adjust the BoxFit property as needed
             ),
             SizedBox(height: 8.0), // Add some spacing below the image
+            */
+            recipe['imageUrl'] != null ? Image.network(
+              recipe['imageUrl'],
+              height: 150,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            )
+                : Image.asset(
+              'assets/recipe.png',
+              height: 150,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+            SizedBox(height: 8.0),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -166,7 +181,7 @@ class RecipeDetails extends StatelessWidget {
               width: 100,
             ),
             const SizedBox(width: 10),
-            const Text("Recipe Rover"),
+            const Text("What's Cooking"),
           ],
         ),
       ),
@@ -189,8 +204,22 @@ class RecipeDetails extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(
                         12.0), // Adjust the radius as needed
-                    child: Image.asset(
+                    child: /* Image.asset(
                       'recipe2.jpg', // Adjust the image path as needed
+                      height: 250,
+                      width: 300,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  */ recipe['imageUrl'] != null
+                        ? Image.network(
+                      recipe['imageUrl'],
+                      height: 250,
+                      width: 300,
+                      fit: BoxFit.cover,
+                    )
+                        : Image.asset(
+                      'assets/recipe2.jpg',
                       height: 250,
                       width: 300,
                       fit: BoxFit.cover,

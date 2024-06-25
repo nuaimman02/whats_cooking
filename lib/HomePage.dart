@@ -15,7 +15,7 @@ class HomePage extends StatelessWidget {
               width: 100,
             ),
             const SizedBox(width: 10),
-            const Text("Recipe Rover"),
+            const Text("What's Cooking"),
           ],
         ),
       ),
@@ -25,7 +25,7 @@ class HomePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Welcome to our RecipeRover App',
+              'Welcome to our What\'s Cooking App',
               style: TextStyle(
                 fontSize: 24.0,
                 fontWeight: FontWeight.bold,

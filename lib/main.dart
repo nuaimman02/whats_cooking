@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const MyHomePage(title: 'Recipe Rover'),
+      home: const MyHomePage(title: 'What\'s Cooking'),
     );
   }
 }

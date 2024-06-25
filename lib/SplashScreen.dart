@@ -20,7 +20,7 @@ class SplashScreen extends StatelessWidget {
             children: [
               // Your splash screen content, such as logo or image
               Image.asset(
-                'assets/logo.png', // Adjust the image path as needed
+                'assets/whatscooking_logo.png', // Adjust the image path as needed
                 height: 500,
                 width: 500,
               ),

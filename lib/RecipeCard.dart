@@ -19,13 +19,14 @@ class _RecipeScreenState extends State<RecipeScreen> {
           children: <Widget>[
             Image.asset(
               'assets/whatscooking_logo.png',
-              height: 80,
-              width: 100,
+              height: 40,
+              width: 50,
             ),
             const SizedBox(width: 10),
             const Text("What's Cooking"),
           ],
         ),
+        backgroundColor: Colors.orange,
       ),
       body: Column(
         children: [
@@ -39,7 +40,10 @@ class _RecipeScreenState extends State<RecipeScreen> {
               },
               decoration: InputDecoration(
                 labelText: 'Search Recipe',
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                prefixIcon: Icon(Icons.search),
               ),
             ),
           ),
@@ -85,10 +89,12 @@ class RecipeGrid extends StatelessWidget {
         }
 
         return GridView.builder(
+          padding: const EdgeInsets.all(8.0),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             crossAxisSpacing: 8.0,
             mainAxisSpacing: 8.0,
+            childAspectRatio: 0.8,
           ),
           itemCount: recipeList.length,
           itemBuilder: (context, index) {
@@ -108,7 +114,10 @@ class RecipeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.all(8.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      elevation: 4.0,
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -121,48 +130,50 @@ class RecipeCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            recipe['imageUrl'] != null
-                ? Image.network(
-              recipe['imageUrl'],
-              height: 150,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            )
-                : Image.asset(
-              'assets/recipe.png',
-              height: 150,
-              width: double.infinity,
-              fit: BoxFit.cover,
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12.0)),
+              child: recipe['imageUrl'] != null
+                  ? Image.network(
+                recipe['imageUrl'],
+                height: 150,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              )
+                  : Image.asset(
+                'assets/recipe.png',
+                height: 150,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
             ),
-            SizedBox(height: 8.0),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.all(8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     recipe["name"],
                     style: TextStyle(
-                      fontSize: 20.0,
+                      fontSize: 16.0,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: Colors.black87,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4.0),
                   Row(
                     children: [
-                      Icon(Icons.star, color: Colors.yellow),
-                      Icon(Icons.star, color: Colors.yellow),
-                      Icon(Icons.star, color: Colors.yellow),
-                      Icon(Icons.star_half, color: Colors.yellow),
-                      Icon(Icons.star_border, color: Colors.yellow),
+                      Icon(Icons.star, color: Colors.yellow, size: 16),
+                      Icon(Icons.star, color: Colors.yellow, size: 16),
+                      Icon(Icons.star, color: Colors.yellow, size: 16),
+                      Icon(Icons.star_half, color: Colors.yellow, size: 16),
+                      Icon(Icons.star_border, color: Colors.yellow, size: 16),
                       SizedBox(width: 4.0),
                     ],
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 8.0),
           ],
         ),
       ),
@@ -183,13 +194,14 @@ class RecipeDetails extends StatelessWidget {
           children: <Widget>[
             Image.asset(
               'assets/whatscooking_logo.png',
-              height: 80,
-              width: 100,
+              height: 40,
+              width: 50,
             ),
             const SizedBox(width: 10),
             const Text("What's Cooking"),
           ],
         ),
+        backgroundColor: Colors.orange,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -212,13 +224,13 @@ class RecipeDetails extends StatelessWidget {
                         ? Image.network(
                       recipe['imageUrl'],
                       height: 250,
-                      width: 300,
+                      width: double.infinity,
                       fit: BoxFit.cover,
                     )
                         : Image.asset(
                       'assets/recipe2.jpg',
                       height: 250,
-                      width: 300,
+                      width: double.infinity,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -226,7 +238,7 @@ class RecipeDetails extends StatelessWidget {
                   Text(
                     recipe["name"],
                     style: TextStyle(
-                      fontSize: 28.0,
+                      fontSize: 24.0,
                       fontWeight: FontWeight.bold,
                       color: Colors.orange,
                     ),
@@ -253,9 +265,8 @@ class RecipeDetails extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16.0,
                         color: Colors.black87,
-                        fontFamily: 'Nunito',
                         letterSpacing: 0.3,
-                        height: 1.0,
+                        height: 1.5,
                       ),
                     ),
                   ),
@@ -281,8 +292,7 @@ class RecipeDetails extends StatelessWidget {
                         fontSize: 16.0,
                         color: Colors.black87,
                         letterSpacing: 0.3,
-                        fontFamily: 'Nunito',
-                        height: 1.0,
+                        height: 1.5,
                       ),
                     ),
                   ),

@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -64,6 +63,8 @@ class _HomeScreenState extends State<HomeScreen> {
         'ingredients': ingredients,
         'steps': steps,
         'imageUrl': imageUrl,
+        'ratings' :[],
+        'averageRating' : 0,
       }).then((_) {
         // Show success sign
         setState(() {

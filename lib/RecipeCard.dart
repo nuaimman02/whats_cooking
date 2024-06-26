@@ -10,6 +10,7 @@ class RecipeScreen extends StatefulWidget {
 
 class _RecipeScreenState extends State<RecipeScreen> {
   String searchValue = "";
+  String sortOrder = "none";
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +48,39 @@ class _RecipeScreenState extends State<RecipeScreen> {
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Sort by Rating:"),
+                DropdownButton<String>(
+                  value: sortOrder,
+                  items: [
+                    DropdownMenuItem(
+                      value: "none",
+                      child: Text("None"),
+                    ),
+                    DropdownMenuItem(
+                      value: "high_to_low",
+                      child: Text("High to Low"),
+                    ),
+                    DropdownMenuItem(
+                      value: "low_to_high",
+                      child: Text("Low to High"),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      sortOrder = value!;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
           Expanded(
-            child: RecipeGrid(searchValue: searchValue),
+            child: RecipeGrid(searchValue: searchValue, sortOrder: sortOrder),
           ),
         ],
       ),
@@ -58,8 +90,9 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
 class RecipeGrid extends StatelessWidget {
   final String searchValue;
+  final String sortOrder;
 
-  RecipeGrid({required this.searchValue});
+  RecipeGrid({required this.searchValue, required this.sortOrder});
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +121,15 @@ class RecipeGrid extends StatelessWidget {
           }).toList();
         }
 
+        // Sort the recipes based on the selected sort order
+        if (sortOrder != "none") {
+          recipeList.sort((a, b) {
+            double ratingA = a['averageRating']?.toDouble() ?? 0.0;
+            double ratingB = b['averageRating']?.toDouble() ?? 0.0;
+            return sortOrder == "high_to_low" ? ratingB.compareTo(ratingA) : ratingA.compareTo(ratingB);
+          });
+        }
+
         return GridView.builder(
           padding: const EdgeInsets.all(8.0),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -113,11 +155,10 @@ class RecipeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double averageRating = recipe['averageRating']?.toDouble() ?? 0.0;
+
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      elevation: 4.0,
+      margin: EdgeInsets.all(8.0),
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -130,8 +171,8 @@ class RecipeCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(12.0)),
+            Flexible(
+              flex: 2,
               child: recipe['imageUrl'] != null
                   ? Image.network(
                 recipe['imageUrl'],
@@ -146,40 +187,42 @@ class RecipeCard extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
+            SizedBox(height: 8.0),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     recipe["name"],
                     style: TextStyle(
-                      fontSize: 16.0,
+                      fontSize: 18.0,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: Colors.black,
                     ),
                     overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                   SizedBox(height: 4.0),
                   Row(
-                    children: [
-                      Icon(Icons.star, color: Colors.yellow, size: 16),
-                      Icon(Icons.star, color: Colors.yellow, size: 16),
-                      Icon(Icons.star, color: Colors.yellow, size: 16),
-                      Icon(Icons.star_half, color: Colors.yellow, size: 16),
-                      Icon(Icons.star_border, color: Colors.yellow, size: 16),
-                      SizedBox(width: 4.0),
-                    ],
+                    children: List.generate(5, (index) {
+                      return Icon(
+                        index < averageRating.round() ? Icons.star : Icons.star_border,
+                        color: Colors.yellow,
+                      );
+                    }),
                   ),
                 ],
               ),
             ),
+            SizedBox(height: 8.0),
           ],
         ),
       ),
     );
   }
 }
+
 
 class RecipeDetails extends StatelessWidget {
   final QueryDocumentSnapshot recipe;
@@ -201,7 +244,6 @@ class RecipeDetails extends StatelessWidget {
             const Text("What's Cooking"),
           ],
         ),
-        backgroundColor: Colors.orange,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -224,13 +266,13 @@ class RecipeDetails extends StatelessWidget {
                         ? Image.network(
                       recipe['imageUrl'],
                       height: 250,
-                      width: double.infinity,
+                      width: 300,
                       fit: BoxFit.cover,
                     )
                         : Image.asset(
                       'assets/recipe2.jpg',
                       height: 250,
-                      width: double.infinity,
+                      width: 300,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -238,7 +280,7 @@ class RecipeDetails extends StatelessWidget {
                   Text(
                     recipe["name"],
                     style: TextStyle(
-                      fontSize: 24.0,
+                      fontSize: 28.0,
                       fontWeight: FontWeight.bold,
                       color: Colors.orange,
                     ),
@@ -265,6 +307,7 @@ class RecipeDetails extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16.0,
                         color: Colors.black87,
+                        fontFamily: 'Nunito',
                         letterSpacing: 0.3,
                         height: 1.5,
                       ),
@@ -292,16 +335,102 @@ class RecipeDetails extends StatelessWidget {
                         fontSize: 16.0,
                         color: Colors.black87,
                         letterSpacing: 0.3,
+                        fontFamily: 'Nunito',
                         height: 1.5,
                       ),
                     ),
                   ),
+                  Divider(),
+                  SizedBox(height: 16.0),
+                  RatingWidget(recipe),
                 ],
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class RatingWidget extends StatefulWidget {
+  final QueryDocumentSnapshot recipe;
+
+  RatingWidget(this.recipe);
+
+  @override
+  _RatingWidgetState createState() => _RatingWidgetState();
+}
+
+class _RatingWidgetState extends State<RatingWidget> {
+  int _currentRating = 0;
+
+  Future<void> _submitRating() async {
+    if (_currentRating > 0) {
+      try {
+        final recipeRef = FirebaseFirestore.instance.collection('recipes').doc(widget.recipe.id);
+        final recipeSnapshot = await recipeRef.get();
+
+        if (!recipeSnapshot.exists) {
+          throw Exception('Recipe document does not exist');
+        }
+
+        final recipeData = recipeSnapshot.data();
+        if (recipeData == null) {
+          throw Exception('Recipe data is null');
+        }
+
+        List<int> ratings = recipeData['ratings'] != null
+            ? List<int>.from(recipeData['ratings'])
+            : [];
+        ratings.add(_currentRating);
+
+        double averageRating = ratings.reduce((a, b) => a + b) / ratings.length;
+
+        await recipeRef.update({
+          'ratings': ratings,
+          'averageRating': averageRating,
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Rating submitted successfully!')));
+
+        setState(() {
+          _currentRating = 0;
+        });
+      } catch (e) {
+        print('Error submitting rating: $e');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to submit rating. Please try again.')));
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please select a rating before submitting.')));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(5, (index) {
+            return IconButton(
+              icon: Icon(
+                index < _currentRating ? Icons.star : Icons.star_border,
+                color: Colors.yellow,
+              ),
+              onPressed: () {
+                setState(() {
+                  _currentRating = index + 1;
+                });
+              },
+            );
+          }),
+        ),
+        ElevatedButton(
+          onPressed: _submitRating,
+          child: Text('Submit Rating'),
+        ),
+      ],
     );
   }
 }

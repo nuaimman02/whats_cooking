@@ -191,7 +191,7 @@ class RecipeCard extends StatelessWidget {
                 TextFormField(
                   controller: stepsController,
                   decoration: const InputDecoration(
-                    labelText: 'Recipe',
+                    labelText: 'Steps',
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {

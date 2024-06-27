@@ -50,60 +50,47 @@ class HomePage extends StatelessWidget {
               fit: BoxFit.cover,
             ),
             SizedBox(height: screenHeight * 0.02),
-
-            // Explore Recipes Button
-            Container(
-              width: double.infinity, // Adjust the width as needed
-              child: ElevatedButton(
-                onPressed: () {
-                  // Navigate to RecipeScreen when Explore Recipes is clicked
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RecipeScreen(),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.0),
-                  ),
-                ),
-                child: Text(
-                  'Explore Our Recipes',
-                  style: TextStyle(fontSize: screenHeight * 0.025),
-                ),
-              ),
+            _buildButton(
+              context,
+              'Explore Our Recipes',
+              RecipeScreen(),
+              screenHeight,
             ),
             SizedBox(height: screenHeight * 0.02),
-
-            // Add Recipe Button
-            Container(
-              width: double.infinity, // Adjust the width as needed
-              child: ElevatedButton(
-                onPressed: () {
-                  // Navigate to HomeScreen when Add Your Recipe is clicked
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => HomeScreen(),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.0),
-                  ),
-                ),
-                child: Text(
-                  'Add Your Recipe',
-                  style: TextStyle(fontSize: screenHeight * 0.025),
-                ),
-              ),
+            _buildButton(
+              context,
+              'Add Your Recipe',
+              HomeScreen(),
+              screenHeight,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // Helper method to create buttons
+  Widget _buildButton(BuildContext context, String text, Widget destination, double screenHeight) {
+    return Container(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => destination,
+            ),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30.0),
+          ),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(fontSize: screenHeight * 0.025),
         ),
       ),
     );

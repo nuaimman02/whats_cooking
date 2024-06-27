@@ -11,6 +11,7 @@ class RecipeScreen extends StatefulWidget {
 class _RecipeScreenState extends State<RecipeScreen> {
   String searchValue = "";
   String sortOrder = "none";
+  bool searchByIngredient = false;
 
   @override
   Widget build(BuildContext context) {
@@ -79,8 +80,26 @@ class _RecipeScreenState extends State<RecipeScreen> {
               ],
             ),
           ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Checkbox(
+                value: searchByIngredient,
+                onChanged: (bool? value) {
+                  setState(() {
+                    searchByIngredient = value!;
+                  });
+                },
+              ),
+              Text('Search by Ingredient'),
+            ],
+          ),
           Expanded(
-            child: RecipeGrid(searchValue: searchValue, sortOrder: sortOrder),
+            child: RecipeGrid(
+              searchValue: searchValue,
+              sortOrder: sortOrder,
+              searchByIngredient: searchByIngredient,
+            ),
           ),
         ],
       ),
@@ -91,8 +110,13 @@ class _RecipeScreenState extends State<RecipeScreen> {
 class RecipeGrid extends StatelessWidget {
   final String searchValue;
   final String sortOrder;
+  final bool searchByIngredient;
 
-  RecipeGrid({required this.searchValue, required this.sortOrder});
+  RecipeGrid({
+    required this.searchValue,
+    required this.sortOrder,
+    required this.searchByIngredient,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -113,11 +137,14 @@ class RecipeGrid extends StatelessWidget {
 
         List<QueryDocumentSnapshot> recipeList = snapshot.data!.docs;
 
-        // Filter the recipes based on the search value
+        // Filter the recipes based on the search value and search by ingredient flag
         if (searchValue.isNotEmpty) {
           recipeList = recipeList.where((doc) {
             String name = doc['name'].toString().toLowerCase();
-            return name.contains(searchValue.toLowerCase());
+            String ingredients = doc['ingredients'].toString().toLowerCase();
+            return searchByIngredient
+                ? ingredients.contains(searchValue.toLowerCase())
+                : name.contains(searchValue.toLowerCase());
           }).toList();
         }
 
@@ -126,7 +153,9 @@ class RecipeGrid extends StatelessWidget {
           recipeList.sort((a, b) {
             double ratingA = a['averageRating']?.toDouble() ?? 0.0;
             double ratingB = b['averageRating']?.toDouble() ?? 0.0;
-            return sortOrder == "high_to_low" ? ratingB.compareTo(ratingA) : ratingA.compareTo(ratingB);
+            return sortOrder == "high_to_low"
+                ? ratingB.compareTo(ratingA)
+                : ratingA.compareTo(ratingB);
           });
         }
 
@@ -207,7 +236,9 @@ class RecipeCard extends StatelessWidget {
                   Row(
                     children: List.generate(5, (index) {
                       return Icon(
-                        index < averageRating.round() ? Icons.star : Icons.star_border,
+                        index < averageRating.round()
+                            ? Icons.star
+                            : Icons.star_border,
                         color: Colors.yellow,
                       );
                     }),
@@ -222,7 +253,6 @@ class RecipeCard extends StatelessWidget {
     );
   }
 }
-
 
 class RecipeDetails extends StatelessWidget {
   final QueryDocumentSnapshot recipe;

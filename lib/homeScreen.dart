@@ -65,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
         'imageUrl': imageUrl,
         'ratings' :[],
         'averageRating' : 0,
+        'comments': [],
       }).then((_) {
         // Show success sign
         setState(() {

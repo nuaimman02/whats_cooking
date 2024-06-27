@@ -278,104 +278,97 @@ class RecipeDetails extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
-          child: Card(
-            elevation: 8.0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12.0),
-                    child: recipe['imageUrl'] != null
-                        ? Image.network(
-                      recipe['imageUrl'],
-                      height: 250,
-                      width: 300,
-                      fit: BoxFit.cover,
-                    )
-                        : Image.asset(
-                      'assets/recipe2.jpg',
-                      height: 250,
-                      width: 300,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  SizedBox(height: 16.0),
-                  Text(
-                    recipe["name"],
-                    style: TextStyle(
-                      fontSize: 28.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.orange,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 16.0),
-                  Divider(),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "INGREDIENTS",
-                      style: TextStyle(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 8.0),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      recipe["ingredients"],
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        color: Colors.black87,
-                        fontFamily: 'Nunito',
-                        letterSpacing: 0.3,
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  Divider(),
-                  SizedBox(height: 16.0),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "RECIPE",
-                      style: TextStyle(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 8.0),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      recipe["steps"],
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        color: Colors.black87,
-                        letterSpacing: 0.3,
-                        fontFamily: 'Nunito',
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  Divider(),
-                  SizedBox(height: 16.0),
-                  RatingWidget(recipe),
-                ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Recipe details code...
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12.0),
+                child: recipe['imageUrl'] != null
+                    ? Image.network(
+                  recipe['imageUrl'],
+                  height: 250,
+                  width: 300,
+                  fit: BoxFit.cover,
+                )
+                    : Image.asset(
+                  'assets/recipe2.jpg',
+                  height: 250,
+                  width: 300,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
+              SizedBox(height: 16.0),
+              Text(
+                recipe["name"],
+                style: TextStyle(
+                  fontSize: 28.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 16.0),
+              Divider(),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "INGREDIENTS",
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange,
+                  ),
+                ),
+              ),
+              SizedBox(height: 8.0),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  recipe["ingredients"],
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.black87,
+                    fontFamily: 'Nunito',
+                    letterSpacing: 0.3,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+              Divider(),
+              SizedBox(height: 16.0),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "RECIPE",
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange,
+                  ),
+                ),
+              ),
+              SizedBox(height: 8.0),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  recipe["steps"],
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.black87,
+                    letterSpacing: 0.3,
+                    fontFamily: 'Nunito',
+                    height: 1.5,
+                  ),
+                ),
+              ),
+              Divider(),
+              SizedBox(height: 16.0),
+              RatingWidget(recipe),
+              SizedBox(height: 16.0),
+              Divider(),
+              CommentSection(recipeId: recipe.id),
+            ],
           ),
         ),
       ),
@@ -459,6 +452,96 @@ class _RatingWidgetState extends State<RatingWidget> {
         ElevatedButton(
           onPressed: _submitRating,
           child: Text('Submit Rating'),
+        ),
+      ],
+    );
+  }
+}
+
+class CommentSection extends StatefulWidget {
+  final String recipeId;
+
+  CommentSection({required this.recipeId});
+
+  @override
+  _CommentSectionState createState() => _CommentSectionState();
+}
+
+class _CommentSectionState extends State<CommentSection> {
+  final TextEditingController _commentController = TextEditingController();
+
+  Future<void> _submitComment() async {
+    if (_commentController.text.isNotEmpty) {
+      await FirebaseFirestore.instance
+          .collection('recipes')
+          .doc(widget.recipeId)
+          .collection('comments')
+          .add({
+        'text': _commentController.text,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      _commentController.clear();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Comments',
+          style: TextStyle(
+            fontSize: 18.0,
+            fontWeight: FontWeight.bold,
+            color: Colors.orange,
+          ),
+        ),
+        SizedBox(height: 8.0),
+        StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('recipes')
+              .doc(widget.recipeId)
+              .collection('comments')
+              .orderBy('timestamp', descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return Center(child: CircularProgressIndicator());
+            }
+
+            var comments = snapshot.data!.docs;
+
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: comments.length,
+              itemBuilder: (context, index) {
+                var comment = comments[index];
+                return ListTile(
+                  title: Text(comment['text']),
+                  subtitle: Text(comment['timestamp'] != null
+                      ? comment['timestamp'].toDate().toString()
+                      : 'Just now'),
+                );
+              },
+            );
+          },
+        ),
+        SizedBox(height: 16.0),
+        TextField(
+          controller: _commentController,
+          decoration: InputDecoration(
+            labelText: 'Add a comment',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            suffixIcon: IconButton(
+              icon: Icon(Icons.send),
+              onPressed: _submitComment,
+            ),
+          ),
         ),
       ],
     );
